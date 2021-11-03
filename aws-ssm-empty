@@ -1,0 +1,22 @@
+data "aws_kms_alias" "parameter_kms_alias" {
+  name = "alias/scb/ssm-current"
+}
+
+data "aws_ssm_parameter" "data_ssm_secret" {
+  name = aws-ssm-keypair
+  depends_on = ["aws_ssm_parameter.ssm_secret"]
+}
+
+resource "aws_ssm_parameter" "ssm_secret"
+   count   = "${var.enabled > 0 ? 1 : 0}"
+   name    = "aws-ssm-keypair"
+   type    = "SecureString"
+   key_id  = "${data.aws_kms_alias.parameter_kms_alias.arn}"
+   value   = "DONOTPUTSECRETHERE"
+   overwrite = "${var.overwrite}"
+   
+   lifecycle {
+      ignore_changes = ["value"]
+   
+   }
+ }
